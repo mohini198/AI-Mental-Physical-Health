@@ -1,0 +1,76 @@
+import streamlit as st
+import torch
+import cv2
+import numpy as np
+from PIL import Image
+from torchvision import transforms
+
+import sys
+sys.path.append("src")
+
+from models.model import get_model
+from utils.gradcam import GradCAM
+
+# -------------------------------
+# Load model
+# -------------------------------
+@st.cache_resource
+def load_model():
+    model = get_model()
+    model.load_state_dict(torch.load("model.pth", map_location=torch.device("cpu")))
+    model.eval()
+    return model
+
+model = load_model()
+
+# Target layer
+target_layer = model.features.denseblock4
+gradcam = GradCAM(model, target_layer)
+
+# -------------------------------
+# UI
+# -------------------------------
+st.title("🩺 Pneumonia Detection with Grad-CAM")
+
+uploaded_file = st.file_uploader("Upload Chest X-ray", type=["jpg", "png", "jpeg"])
+
+if uploaded_file is not None:
+
+    # Show image
+    image = Image.open(uploaded_file).convert("RGB")
+    st.image(image, caption="Uploaded Image", use_column_width=True)
+
+    # Transform
+    transform = transforms.Compose([
+        transforms.Resize((224,224)),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225]
+        )
+    ])
+
+    input_tensor = transform(image).unsqueeze(0)
+
+    # Prediction
+    output = model(input_tensor)
+    probs = torch.softmax(output, dim=1)
+    conf, pred = torch.max(probs, 1)
+
+    class_names = ["Normal", "Pneumonia"]
+
+    st.subheader(f"Prediction: {class_names[pred.item()]}")
+    st.write(f"Confidence: {conf.item()*100:.2f}%")
+
+    # Grad-CAM
+    cam = gradcam.generate(input_tensor, pred.item())
+
+    heatmap = cv2.applyColorMap(np.uint8(255 * cam), cv2.COLORMAP_JET)
+
+    img_cv = np.array(image.resize((224,224)))
+    img_cv = img_cv.astype(np.float32) / 255.0
+    heatmap = heatmap.astype(np.float32) / 255.0
+
+    superimposed = heatmap * 0.5 + img_cv * 0.5
+
+    st.image(superimposed, caption="Grad-CAM", use_column_width=True)
