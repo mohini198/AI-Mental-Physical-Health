@@ -1,3 +1,6 @@
+from xml.parsers.expat import model
+
+import git
 import streamlit as st
 import torch
 import cv2
@@ -16,12 +19,19 @@ from utils.gradcam import GradCAM
 # -------------------------------
 @st.cache_resource
 def load_model():
-    model = get_model()
-    model.load_state_dict(torch.load("model.pth", map_location=torch.device("cpu")))
-    model.eval()
-    return model
+    try:
+        model = get_model()
+        model.load_state_dict(torch.load("model.pth", map_location=torch.device("cpu")))
+        model.eval()
+        return model
+    except:
+        return None
 
 model = load_model()
+
+if model is None:
+    st.info("⚠️ Model file not included. Please download or retrain.")
+    st.stop()
 
 # Target layer
 target_layer = model.features.denseblock4
@@ -74,3 +84,4 @@ if uploaded_file is not None:
     superimposed = heatmap * 0.5 + img_cv * 0.5
 
     st.image(superimposed, caption="Grad-CAM", use_column_width=True)
+    
