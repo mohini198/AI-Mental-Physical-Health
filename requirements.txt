@@ -1,10 +1,10 @@
-torch
-torchvision
+streamlit
 numpy
 pandas
 matplotlib
 scikit-learn
-streamlit
-grad-cam
-opencv-python
 pillow
+opencv-python-headless==4.10.0.84
+torch==2.2.2
+torchvision==0.17.2
+grad-cam==1.4.6

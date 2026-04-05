@@ -23,19 +23,17 @@ class GradCAM:
 
     def generate(self, input_image, class_idx):
 
-        # 🔥 IMPORTANT: clone + detach input
+   
         input_image = input_image.clone().detach()
 
         self.model.zero_grad()
 
-        # 🔥 forward safely
         output = self.model(input_image)
         loss = output[:, class_idx]
 
-        # 🔥 backward safely
+       
         loss.backward(retain_graph=True)
 
-        # 🔥 clone tensors to avoid inplace issues
         gradients = self.gradients.detach().cpu().clone().numpy()[0]
         activations = self.activations.detach().cpu().clone().numpy()[0]
 

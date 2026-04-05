@@ -1,6 +1,5 @@
 venv/
 __pycache__/
 *.pyc
-model.pth
 chest_xray/
-*.zip
+*.zipv
