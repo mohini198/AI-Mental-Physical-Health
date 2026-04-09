@@ -48,7 +48,7 @@ if uploaded_file is not None:
     # Load Image (SAFE)
     # -------------------------------
     image = Image.open(uploaded_file).convert("RGB")
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+    st.image(image, caption="Uploaded Image", width=300)
 
     # -------------------------------
     # Transform
@@ -115,5 +115,5 @@ if uploaded_file is not None:
     # -------------------------------
     # Show Grad-CAM
     # -------------------------------
-    st.image(superimposed, caption="Grad-CAM", use_column_width=True)
+    st.image(superimposed, caption="Grad-CAM", width=300)
     
