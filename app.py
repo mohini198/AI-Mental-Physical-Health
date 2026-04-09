@@ -6,6 +6,7 @@ import torch
 import cv2
 import numpy as np
 from PIL import Image
+from PIL import Image
 from torchvision import transforms
 
 import sys
@@ -59,6 +60,14 @@ if uploaded_file is not None:
             std=[0.229, 0.224, 0.225]
         )
     ])
+
+    
+
+# Fix image format
+    if not isinstance(image, Image.Image):
+        image = Image.fromarray(image)
+
+    image = image.convert("RGB")
 
     input_tensor = transform(image).unsqueeze(0)
 
