@@ -4,6 +4,7 @@ pandas
 matplotlib
 scikit-learn
 pillow
-opencv-python-headless
+opencv-python-headless==4.8.0.76
+
 torch==2.2.2
-torchvision
+torchvision==0.17.2
