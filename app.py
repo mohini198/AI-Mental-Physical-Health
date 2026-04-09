@@ -67,21 +67,30 @@ if uploaded_file is not None:
     # -------------------------------
     # Prediction
     # -------------------------------
-    with torch.no_grad():
-        output = model(input_tensor)
-        probs = torch.softmax(output, dim=1)
-        conf, pred = torch.max(probs, 1)
+    # Prediction
+    try:
+        with torch.no_grad():
+            output = model(input_tensor)
 
-    class_names = ["Normal", "Pneumonia"]
+            probs = torch.softmax(output, dim=1)
+            conf, pred = torch.max(probs, 1)
 
-    st.subheader(f"Prediction: {class_names[pred.item()]}")
-    st.write(f"Confidence: {conf.item()*100:.2f}%")
+            class_names = ["Normal", "Pneumonia"]
+
+            st.subheader(f"Prediction: {class_names[pred.item()]}")
+            st.write(f"Confidence: {conf.item()*100:.2f}%")
+
+    except Exception as e:
+        st.error(f"Prediction Error: {e}")
 
     # -------------------------------
     # Grad-CAM (FIXED)
     # -------------------------------
-    cam = gradcam.generate(input_tensor, pred.item())
-
+    try:
+        cam = gradcam.generate(input_tensor, pred.item())
+    except Exception as e:
+        st.error(f"Grad-CAM Error: {e}")
+        st.stop()
     # Convert tensor → numpy safely
     if torch.is_tensor(cam):
         cam = cam.detach().cpu().numpy()
